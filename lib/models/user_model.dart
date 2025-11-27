@@ -7,12 +7,14 @@ class User {
   final String username;
   final String namaLengkap;
   final int idCabang;
+  final String role;
 
   User({
     required this.id,
     required this.username,
     required this.namaLengkap,
     required this.idCabang,
+    required this.role,
   });
 
   /// Factory constructor untuk membuat objek User dari data JSON.
@@ -24,6 +26,7 @@ class User {
       username: json['username'] as String,
       namaLengkap: json['namaLengkap'] as String,
       idCabang: json['idCabang'] as int,
+      role: json['role'] as String,
     );
   }
 }

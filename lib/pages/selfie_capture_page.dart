@@ -1,9 +1,9 @@
 // lib/pages/selfie_capture_page.dart
 
-import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'dashboard_page.dart';
@@ -25,7 +25,21 @@ class _SelfieCapturePageState extends State<SelfieCapturePage>
   @override
   void initState() {
     super.initState();
-    // Daftarkan observer untuk mendengarkan perubahan siklus hidup aplikasi
+
+    // Jika web -> langsung bypass ke Dashboard (tidak mencoba inisialisasi kamera)
+    if (kIsWeb) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Jika ada logic auth yang harus set selfie untuk web,
+        // bisa panggil provider di sini sebelum navigasi.
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const DashboardPage()),
+        );
+      });
+      return;
+    }
+
+    // Mobile path: tetap gunakan observer + inisialisasi kamera
     WidgetsBinding.instance.addObserver(this);
     _initializeCamera();
   }

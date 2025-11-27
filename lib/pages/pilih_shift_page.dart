@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'selfie_capture_page.dart';
-import 'dashboard_page.dart';
 import '../models/shift_model.dart';
 import '../services/api_service.dart';
 import '../providers/auth_provider.dart';
@@ -43,12 +42,12 @@ class _PilihShiftPageState extends State<PilihShiftPage> {
   void _pilihShift(Shift shift) {
     // Simpan shift yang dipilih ke Provider
     context.read<AuthProvider>().selectShift(shift);
-    
+
     // Navigasi ke Halaman Selfie, bukan Dashboard
     Navigator.of(context).pushReplacement(
-    MaterialPageRoute(builder: (context) => const SelfieCapturePage()),
-  );
-}
+      MaterialPageRoute(builder: (context) => const SelfieCapturePage()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

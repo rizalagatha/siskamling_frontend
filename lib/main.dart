@@ -4,9 +4,15 @@ import 'package:provider/provider.dart';
 import 'pages/login_page.dart';
 import 'providers/auth_provider.dart';
 import 'providers/checkpoint_provider.dart';
+import 'providers/apar_provider.dart';
+import 'services/notification_service.dart';
 
-void main() {
+Future<void> main() async { // <-- Ubah menjadi async
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inisialisasi servis notifikasi
+  await NotificationService().init(); 
+  
   runApp(const MyApp());
 }
 
@@ -19,6 +25,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => CheckpointProvider()),
+        ChangeNotifierProvider(create: (context) => AparProvider()),
       ],
       child: MaterialApp(
         title: 'Siskamling',

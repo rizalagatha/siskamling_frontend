@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'pilih_shift_page.dart';
+import 'admin/admin_dashboard_page.dart';
 import '../services/api_service.dart';
 import '../providers/auth_provider.dart';
 
@@ -77,9 +78,19 @@ class _LoginPageState extends State<LoginPage> {
 
       context.read<AuthProvider>().login(user);
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const PilihShiftPage()),
-      );
+      // --- PERUBAHAN LOGIKA NAVIGASI (ALUR 1) ---
+      if (user.role == 'admin') {
+        // Jika user adalah ADMIN, arahkan ke Admin Dashboard
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
+        );
+      } else {
+        // Jika user adalah SATPAM, arahkan ke alur normal
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const PilihShiftPage()),
+        );
+      }
+
     } on Exception catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

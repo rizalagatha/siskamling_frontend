@@ -1,5 +1,5 @@
 // lib/pages/scanner_page.dart
-import 'dart:typed_data';
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -23,14 +23,13 @@ class ScannerPage extends StatefulWidget {
 
 class _ScannerPageState extends State<ScannerPage> {
   final MobileScannerController _cameraController = MobileScannerController(
-    detectionSpeed: DetectionSpeed.noDuplicates,
+    detectionSpeed: DetectionSpeed.normal,
     facing: CameraFacing.back,
     returnImage: false,
   );
 
   bool _isProcessing = false;
   String _processingMessage = '';
-  late Future<Position> _locationFuture;
 
   @override
   void initState() {
@@ -64,9 +63,7 @@ class _ScannerPageState extends State<ScannerPage> {
       return;
     }
 
-    _locationFuture = Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+    await Future.delayed(const Duration(milliseconds: 100));
 
     setState(() {
       _isProcessing = false;
@@ -82,7 +79,8 @@ class _ScannerPageState extends State<ScannerPage> {
       _isProcessing = true;
       _processingMessage = 'QR Code Terbaca...';
     });
-    _cameraController.stop();
+
+    await _cameraController.stop(); // PENTING: await
 
     try {
       final barcode = capture.barcodes.firstWhere((b) => b.rawValue != null);
@@ -96,45 +94,39 @@ class _ScannerPageState extends State<ScannerPage> {
       setState(() {
         _processingMessage = 'Memvalidasi Lokasi GPS...';
       });
-      final posisiPerangkat = await _locationFuture;
 
-      final double jarak = Geolocator.distanceBetween(
+      final posisiPerangkat = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      final jarak = Geolocator.distanceBetween(
         posisiPerangkat.latitude,
         posisiPerangkat.longitude,
         lokasiBarcode.latitude,
         lokasiBarcode.longitude,
       );
+
       if (jarak > 10.0) {
         throw Exception(
             "Lokasi Anda terlalu jauh (${jarak.toStringAsFixed(1)}m).");
       }
 
-      // 🔑 Ambil selfie dari provider, bukan capture ulang
+      // selfie
       final authProvider = context.read<AuthProvider>();
-      if (authProvider.selfieImagePath == null) {
-        throw Exception("Selfie tidak tersedia. Silakan login ulang.");
-      }
       final selfieBytes = await authProvider.getSelfieBytes();
-      if (selfieBytes == null) {
-        throw Exception("Selfie belum diambil");
-      }
+      if (selfieBytes == null) throw Exception("Selfie belum diambil");
 
       setState(() {
         _processingMessage = 'Mengisi Laporan Temuan...';
-        _isProcessing = false;
       });
+
       final temuanResult = await _showFormTemuan();
-      if (temuanResult == null) {
-        _resetScanner();
-        return;
-      }
+      if (temuanResult == null) return;
 
       setState(() {
         _isProcessing = true;
         _processingMessage = 'Mengirim Laporan...';
       });
-
-      final waktuSelesai = DateTime.now();
 
       await ApiService.submitAbsensi(
         user: widget.args.user,
@@ -144,7 +136,7 @@ class _ScannerPageState extends State<ScannerPage> {
         adaTemuan: temuanResult['adaTemuan'],
         catatan: temuanResult['catatan'],
         waktuMulai: widget.args.waktuMulai,
-        waktuSelesai: waktuSelesai,
+        waktuSelesai: DateTime.now(),
       );
 
       Navigator.pop(
@@ -155,16 +147,29 @@ class _ScannerPageState extends State<ScannerPage> {
       );
     } catch (e) {
       _showErrorDialog(e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      // Apapun yang terjadi, kamera kembali hidup
+      if (mounted) {
+        await Future.delayed(const Duration(milliseconds: 300));
+        _cameraController.start();
+      }
     }
   }
 
-  void _resetScanner() {
+  void _resetScanner() async {
     if (!mounted) return;
+
     setState(() {
       _isProcessing = false;
       _processingMessage = '';
     });
-    _cameraController.start();
+
+    // delay kecil untuk memastikan kamera siap
+    await Future.delayed(const Duration(milliseconds: 250));
+
+    try {
+      await _cameraController.start();
+    } catch (_) {}
   }
 
   void _showErrorDialog(String message) {

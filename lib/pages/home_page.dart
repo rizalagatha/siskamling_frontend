@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/titik_model.dart';
-import 'selfie_capture_page.dart';
 import 'scanner_page.dart';
 import '../providers/auth_provider.dart';
 import '../providers/checkpoint_provider.dart';
