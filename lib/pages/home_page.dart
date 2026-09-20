@@ -72,45 +72,64 @@ class _HomePageState extends State<HomePage> {
         return Scaffold(
           backgroundColor: const Color(0xFFE8F5E9),
           appBar: AppBar(
-            title: Text('Daftar Check Point', style: Theme.of(context).appBarTheme.titleTextStyle),
+            title: Text('Daftar Check Point',
+                style: Theme.of(context).appBarTheme.titleTextStyle),
             backgroundColor: Theme.of(context).colorScheme.primary,
             iconTheme: const IconThemeData(color: Colors.white),
           ),
           body: checkpointProvider.isLoading
               ? const Center(child: CircularProgressIndicator())
               : checkpointProvider.errorMessage.isNotEmpty
-                  ? Center(child: Text('Error: ${checkpointProvider.errorMessage}', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.red)))
+                  ? Center(
+                      child: Text('Error: ${checkpointProvider.errorMessage}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: Colors.red)))
                   : GridView.builder(
                       padding: const EdgeInsets.all(16.0),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 1.5,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 1.5,
                       ),
                       itemCount: checkpointProvider.titikList.length,
                       itemBuilder: (context, index) {
                         final titik = checkpointProvider.titikList[index];
                         return Card(
-                          clipBehavior: Clip.antiAlias, // Penting agar stack tidak keluar dari border
+                          clipBehavior: Clip
+                              .antiAlias, // Penting agar stack tidak keluar dari border
                           elevation: 4,
                           color: _getColorForStatus(titik.status),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                             side: BorderSide(
-                              color: titik.status == ScanStatus.notScanned ? Theme.of(context).primaryColor : Colors.transparent,
+                              color: titik.status == ScanStatus.notScanned
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.transparent,
                               width: 2,
                             ),
                           ),
-                          child: Stack( // Gunakan Stack untuk menumpuk widget
+                          child: Stack(
+                            // Gunakan Stack untuk menumpuk widget
                             children: [
                               // Konten utama (ikon dan teks)
                               InkWell(
                                 onTap: () async {
                                   final waktuMulai = DateTime.now();
-                                  final authProvider = context.read<AuthProvider>();
-                                  if (authProvider.user == null || authProvider.shift == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sesi tidak valid. Silakan login ulang.')));
+                                  final authProvider =
+                                      context.read<AuthProvider>();
+                                  if (authProvider.user == null ||
+                                      authProvider.shift == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Sesi tidak valid. Silakan login ulang.')));
                                     return;
                                   }
-                                  
+
                                   final args = CheckpointArgs(
                                     titik: titik,
                                     user: authProvider.user!,
@@ -118,31 +137,44 @@ class _HomePageState extends State<HomePage> {
                                     compressedSelfieData: _compressedSelfieData,
                                     waktuMulai: waktuMulai,
                                   );
-                                  
-                                  final result = await Navigator.push<ScanStatus>(
+
+                                  final result =
+                                      await Navigator.push<ScanStatus>(
                                     context,
-                                    MaterialPageRoute(builder: (context) => ScannerPage(args: args)),
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            ScannerPage(args: args)),
                                   );
 
                                   if (result != null) {
-                                    checkpointProvider.updateTitikStatus(titik.id, result);
+                                    checkpointProvider.updateTitikStatus(
+                                        titik.id, result);
                                   }
                                 },
                                 child: Center(
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.location_on_outlined, size: 40, color: _getTextColorForStatus(titik.status)),
+                                        Icon(Icons.location_on_outlined,
+                                            size: 40,
+                                            color: _getTextColorForStatus(
+                                                titik.status)),
                                         const SizedBox(height: 8),
                                         Text(
                                           titik.nama,
                                           textAlign: TextAlign.center,
-                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: _getTextColorForStatus(titik.status),
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: _getTextColorForStatus(
+                                                    titik.status),
+                                              ),
                                         ),
                                       ],
                                     ),
@@ -154,12 +186,14 @@ class _HomePageState extends State<HomePage> {
                                 top: 8,
                                 left: 8,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
                                     color: Colors.black.withOpacity(0.3),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Text(titik.nomorUrut.toString(),
+                                  child: Text(
+                                    titik.nomorUrut.toString(),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,

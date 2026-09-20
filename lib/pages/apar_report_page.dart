@@ -22,12 +22,15 @@ class _AparReportPageState extends State<AparReportPage> {
     if (!_formKey.currentState!.validate()) return;
     if (!_sudahDibalik) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pastikan Anda sudah membolak-balikkan APAR.')),
+        const SnackBar(
+            content: Text('Pastikan Anda sudah membolak-balikkan APAR.')),
       );
       return;
     }
 
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       // Panggil fungsi API baru yang mengirim JSON
@@ -41,16 +44,19 @@ class _AparReportPageState extends State<AparReportPage> {
       if (mounted) {
         Navigator.pop(context, true); // Kirim 'true' (sukses)
       }
-
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString().replaceAll("Exception: ", "")}')),
+          SnackBar(
+              content:
+                  Text('Error: ${e.toString().replaceAll("Exception: ", "")}')),
         );
       }
     } finally {
       if (mounted) {
-        setState(() { _isLoading = false; });
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -87,7 +93,8 @@ class _AparReportPageState extends State<AparReportPage> {
                             title: const Text('Tidak Ada'),
                             value: false,
                             groupValue: _adaTemuan,
-                            onChanged: (val) => setState(() => _adaTemuan = val!),
+                            onChanged: (val) =>
+                                setState(() => _adaTemuan = val!),
                           ),
                         ),
                         Expanded(
@@ -95,7 +102,8 @@ class _AparReportPageState extends State<AparReportPage> {
                             title: const Text('Ada'),
                             value: true,
                             groupValue: _adaTemuan,
-                            onChanged: (val) => setState(() => _adaTemuan = val!),
+                            onChanged: (val) =>
+                                setState(() => _adaTemuan = val!),
                           ),
                         ),
                       ],
@@ -103,10 +111,11 @@ class _AparReportPageState extends State<AparReportPage> {
                     if (_adaTemuan)
                       TextFormField(
                         controller: _catatanController,
-                        decoration: const InputDecoration(labelText: 'Catatan Temuan'),
+                        decoration:
+                            const InputDecoration(labelText: 'Catatan Temuan'),
                         maxLines: 3,
                       ),
-                    
+
                     // Tombol foto bukti sudah dihapus
 
                     const SizedBox(height: 32),

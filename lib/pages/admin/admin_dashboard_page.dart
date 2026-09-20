@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../login_page.dart';
 import 'laporan_checkpoint_page.dart';
 import 'laporan_apar_page.dart';
+import 'laporan_kalender_page.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -20,6 +21,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   final List<Widget> _pages = [
     const LaporanCheckPointPage(),
     const LaporanAparPage(),
+    const LaporanKalenderPage(),
     const Center(child: Text('Segera Hadir: Manajemen User')),
   ];
 
@@ -51,6 +53,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       // Tampilkan BottomNavigationBar jika mobile
       bottomNavigationBar: isMobile
           ? BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
               currentIndex: _selectedIndex,
               onTap: (int index) {
                 setState(() {
@@ -65,6 +68,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 BottomNavigationBarItem(
                   icon: Icon(Icons.fire_extinguisher_outlined),
                   label: 'APAR',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.calendar_month_outlined),
+                  label: 'Kalender',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.people_outline),
@@ -95,6 +102,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   icon: Icon(Icons.fire_extinguisher_outlined),
                   selectedIcon: Icon(Icons.fire_extinguisher),
                   label: Text('Laporan APAR'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.calendar_month_outlined),
+                  selectedIcon: Icon(Icons.calendar_month),
+                  label: Text('Kalender Patroli'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.people_outline),

@@ -278,4 +278,77 @@ class ApiService {
       throw Exception('Gagal terhubung: ${e.toString()}');
     }
   }
+
+  // --- FUNGSI LAPORAN KALENDER (UNTUK ADMIN) ---
+
+  /// Membuang parameter kosong / 'all' agar tidak ikut dikirim.
+  static Map<String, String> _bersihkanParams(Map<String, String?> raw) {
+    final out = <String, String>{};
+    raw.forEach((k, v) {
+      if (v != null && v.isNotEmpty && v != 'all') out[k] = v;
+    });
+    return out;
+  }
+
+  /// GET ke endpoint laporan kalender dan mengembalikan isi field 'data'.
+  static Future<dynamic> _getLaporanData(
+      String path, Map<String, String?> query) async {
+    final url = Uri.parse('${Config.baseUrl}$path')
+        .replace(queryParameters: _bersihkanParams(query));
+
+    http.Response response;
+    try {
+      response = await http.get(url).timeout(const Duration(seconds: 15));
+    } catch (e) {
+      throw Exception('Gagal terhubung ke server.');
+    }
+
+    dynamic responseData;
+    try {
+      responseData = json.decode(response.body);
+    } catch (e) {
+      throw Exception('Respons server tidak valid (${response.statusCode}).');
+    }
+
+    if (response.statusCode == 200 && responseData['status'] == 'success') {
+      return responseData['data'];
+    }
+    throw Exception(responseData['message'] ?? 'Terjadi kesalahan.');
+  }
+
+  /// Daftar cabang + satpam untuk dropdown filter kalender.
+  static Future<Map<String, dynamic>> fetchKalenderFilter(
+      {String? idCabang}) async {
+    final data =
+        await _getLaporanData('/laporan/kalender/filter', {'cabang': idCabang});
+    return Map<String, dynamic>.from(data);
+  }
+
+  /// Ringkasan patroli per tanggal untuk satu bulan (bulan: yyyy-MM).
+  static Future<Map<String, dynamic>> fetchKalender({
+    required String bulan,
+    String? idCabang,
+    String? idSatpam,
+  }) async {
+    final data = await _getLaporanData('/laporan/kalender', {
+      'bulan': bulan,
+      'cabang': idCabang,
+      'satpam': idSatpam,
+    });
+    return Map<String, dynamic>.from(data);
+  }
+
+  /// Detail patroli pada satu tanggal (tanggal: yyyy-MM-dd).
+  static Future<Map<String, dynamic>> fetchKalenderDetail({
+    required String tanggal,
+    String? idCabang,
+    String? idSatpam,
+  }) async {
+    final data = await _getLaporanData('/laporan/kalender/detail', {
+      'tanggal': tanggal,
+      'cabang': idCabang,
+      'satpam': idSatpam,
+    });
+    return Map<String, dynamic>.from(data);
+  }
 }

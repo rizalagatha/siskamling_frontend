@@ -7,12 +7,13 @@ import 'providers/checkpoint_provider.dart';
 import 'providers/apar_provider.dart';
 import 'services/notification_service.dart';
 
-Future<void> main() async { // <-- Ubah menjadi async
+Future<void> main() async {
+  // <-- Ubah menjadi async
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Inisialisasi servis notifikasi
-  await NotificationService().init(); 
-  
+  await NotificationService().init();
+
   runApp(const MyApp());
 }
 
@@ -32,7 +33,8 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
           scaffoldBackgroundColor: const Color(0xFFE8F5E9),
-          textTheme: GoogleFonts.poppinsTextTheme(), // ✨ Poppins untuk semua teks
+          textTheme:
+              GoogleFonts.poppinsTextTheme(), // ✨ Poppins untuk semua teks
           appBarTheme: AppBarTheme(
             backgroundColor: const Color(0xFF2E7D32),
             titleTextStyle: GoogleFonts.poppins(
