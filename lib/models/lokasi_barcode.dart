@@ -21,8 +21,8 @@ class LokasiBarcode {
       idCabang: json['id_cabang'] ?? 0,
       namaTitik: json['nama_titik'] ?? '',
       nomorUrut: json['nomor_urut'] ?? 0,
-      latitude: double.parse(json['latitude'].toString()),   // 👈 parse string → double
-      longitude: double.parse(json['longitude'].toString()), // 👈 parse string → double
+      latitude: double.tryParse(json['latitude']?.toString() ?? '') ?? 0.0,
+      longitude: double.tryParse(json['longitude']?.toString() ?? '') ?? 0.0,
     );
   }
 }

@@ -85,6 +85,12 @@ class _ScannerPageState extends State<ScannerPage> {
     try {
       final barcode = capture.barcodes.firstWhere((b) => b.rawValue != null);
       final data = jsonDecode(barcode.rawValue!) as Map<String, dynamic>;
+      final idTitikQr =
+          int.tryParse((data['id'] ?? data['id_titik'])?.toString() ?? '') ?? 0;
+
+      if (idTitikQr != widget.args.titik.id) {
+        throw Exception("QR Code tidak sesuai checkpoint.");
+      }
       final lokasiBarcode = LokasiBarcode.fromJson(data);
 
       if (lokasiBarcode.idTitik != widget.args.titik.id) {
@@ -102,8 +108,8 @@ class _ScannerPageState extends State<ScannerPage> {
       final jarak = Geolocator.distanceBetween(
         posisiPerangkat.latitude,
         posisiPerangkat.longitude,
-        lokasiBarcode.latitude,
-        lokasiBarcode.longitude,
+        widget.args.titik.latitude,
+        widget.args.titik.longitude,
       );
 
       if (jarak > 10.0) {
@@ -146,7 +152,10 @@ class _ScannerPageState extends State<ScannerPage> {
             : ScanStatus.scannedOK,
       );
     } catch (e) {
-      _showErrorDialog(e.toString().replaceAll('Exception: ', ''));
+      final msg = e is FormatException
+          ? 'QR Code tidak valid atau bukan QR checkpoint.'
+          : e.toString().replaceAll('Exception: ', '');
+      _showErrorDialog(msg);
     } finally {
       // Apapun yang terjadi, kamera kembali hidup
       if (mounted) {

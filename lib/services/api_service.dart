@@ -16,24 +16,24 @@ class ApiService {
   // --- FUNGSI LOGIN ---
   static Future<User> loginUser(String username, String password) async {
     final url = Uri.parse('${Config.baseUrl}/user/login');
+    http.Response response;
     try {
-      final response = await http
+      response = await http
           .post(
             url,
             headers: {'Content-Type': 'application/json'},
             body: json.encode({'username': username, 'password': password}),
           )
           .timeout(const Duration(seconds: 10));
-
-      final responseData = json.decode(response.body);
-      if (response.statusCode == 200 && responseData['status'] == 'success') {
-        return User.fromJson(responseData['user']);
-      } else {
-        throw Exception(responseData['message'] ?? 'Login gagal');
-      }
     } catch (e) {
       throw Exception('Gagal terhubung ke server. Periksa koneksi.');
     }
+
+    final responseData = json.decode(response.body);
+    if (response.statusCode == 200 && responseData['status'] == 'success') {
+      return User.fromJson(responseData['user']);
+    }
+    throw Exception(responseData['message'] ?? 'Login gagal');
   }
 
   // --- FUNGSI SHIFT ---
@@ -350,5 +350,48 @@ class ApiService {
       'satpam': idSatpam,
     });
     return Map<String, dynamic>.from(data);
+  }
+
+  // --- FUNGSI MANAJEMEN USER (ADMIN) ---
+  static Future<List<Map<String, dynamic>>> getUsers(int requesterId) async {
+    final url = Uri.parse('${Config.baseUrl}/user');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'x-user-id': '$requesterId'},
+      ).timeout(const Duration(seconds: 15));
+      final body = json.decode(response.body);
+      if (response.statusCode != 200) {
+        throw Exception(body['message'] ?? 'Gagal memuat daftar user.');
+      }
+      return List<Map<String, dynamic>>.from(body['data']);
+    } catch (e) {
+      if (e is Exception && e.toString().startsWith('Exception: ')) rethrow;
+      throw Exception('Gagal terhubung ke server.');
+    }
+  }
+
+  static Future<void> setUserAktif(
+      int requesterId, int userId, bool aktif) async {
+    final url = Uri.parse('${Config.baseUrl}/user/$userId/status');
+    try {
+      final response = await http
+          .patch(
+            url,
+            headers: {
+              'x-user-id': '$requesterId',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode({'aktif': aktif}),
+          )
+          .timeout(const Duration(seconds: 15));
+      final body = json.decode(response.body);
+      if (response.statusCode != 200) {
+        throw Exception(body['message'] ?? 'Gagal mengubah status akun.');
+      }
+    } catch (e) {
+      if (e is Exception && e.toString().startsWith('Exception: ')) rethrow;
+      throw Exception('Gagal terhubung ke server.');
+    }
   }
 }

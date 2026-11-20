@@ -15,6 +15,29 @@ class SelfieCapturePage extends StatefulWidget {
   State<SelfieCapturePage> createState() => _SelfieCapturePageState();
 }
 
+class _OvalOverlayPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromCenter(
+      center: size.center(Offset.zero),
+      width: size.width * 0.7,
+      height: size.height * 0.5,
+    );
+    final oval = RRect.fromRectAndRadius(
+      rect,
+      Radius.circular(size.width * 0.35),
+    );
+    final path = Path()
+      ..fillType = PathFillType.evenOdd
+      ..addRect(Offset.zero & size)
+      ..addRRect(oval);
+    canvas.drawPath(path, Paint()..color = Colors.black.withOpacity(0.5));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 // --- PERBAIKAN 1: Tambahkan WidgetsBindingObserver ---
 class _SelfieCapturePageState extends State<SelfieCapturePage>
     with WidgetsBindingObserver {
@@ -53,12 +76,19 @@ class _SelfieCapturePageState extends State<SelfieCapturePage>
         state == AppLifecycleState.paused) {
       _controller?.pausePreview();
     } else if (state == AppLifecycleState.resumed) {
-      _initializeCamera();
+      _controller?.resumePreview();
     }
   }
 
   Future<void> _initializeCamera() async {
     try {
+      final old = _controller;
+      if (old != null) {
+        _controller = null;
+        _initializeControllerFuture = null;
+        if (mounted) setState(() {});
+        await old.dispose();
+      }
       final cameras = await availableCameras();
       final frontCamera = cameras.firstWhere(
         (camera) => camera.lensDirection == CameraLensDirection.front,
@@ -157,27 +187,9 @@ class _SelfieCapturePageState extends State<SelfieCapturePage>
             },
           ),
           // UI Overlay (tidak berubah)
-          ColorFiltered(
-            colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.5), BlendMode.srcOut),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Container(
-                    decoration: const BoxDecoration(color: Colors.transparent)),
-                Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    height: MediaQuery.of(context).size.height * 0.5,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(
-                          MediaQuery.of(context).size.width * 0.35),
-                    ),
-                  ),
-                ),
-              ],
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(painter: _OvalOverlayPainter()),
             ),
           ),
           Column(
