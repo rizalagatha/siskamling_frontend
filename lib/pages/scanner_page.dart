@@ -7,7 +7,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 import '../models/checkpoint_args_model.dart';
-import '../models/lokasi_barcode.dart';
 import '../models/titik_model.dart';
 import '../services/api_service.dart';
 import '../providers/auth_provider.dart';
@@ -87,13 +86,7 @@ class _ScannerPageState extends State<ScannerPage> {
       final data = jsonDecode(barcode.rawValue!) as Map<String, dynamic>;
       final idTitikQr =
           int.tryParse((data['id'] ?? data['id_titik'])?.toString() ?? '') ?? 0;
-
       if (idTitikQr != widget.args.titik.id) {
-        throw Exception("QR Code tidak sesuai checkpoint.");
-      }
-      final lokasiBarcode = LokasiBarcode.fromJson(data);
-
-      if (lokasiBarcode.idTitik != widget.args.titik.id) {
         throw Exception("QR Code tidak sesuai checkpoint.");
       }
 

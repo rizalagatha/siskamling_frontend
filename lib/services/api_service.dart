@@ -394,4 +394,38 @@ class ApiService {
       throw Exception('Gagal terhubung ke server.');
     }
   }
+
+  static Future<void> createSatpam({
+    required int requesterId,
+    required String username,
+    required String password,
+    required String namaLengkap,
+    required int idCabang,
+  }) async {
+    final url = Uri.parse('${Config.baseUrl}/user');
+    try {
+      final response = await http
+          .post(
+            url,
+            headers: {
+              'x-user-id': '$requesterId',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode({
+              'username': username,
+              'password': password,
+              'nama_lengkap': namaLengkap,
+              'id_cabang': idCabang,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
+      final body = json.decode(response.body);
+      if (response.statusCode != 201) {
+        throw Exception(body['message'] ?? 'Gagal membuat akun.');
+      }
+    } catch (e) {
+      if (e is Exception && e.toString().startsWith('Exception: ')) rethrow;
+      throw Exception('Gagal terhubung ke server.');
+    }
+  }
 }
